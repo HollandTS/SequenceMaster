@@ -1,0 +1,137 @@
+Thank you for trying this little inf sequence helper tool!
+
+I made this to simplify writing the Infantry Sequence. All you have to know now is the first and second value, which are:
+Starting Frame and Animation frame count (e.g.: Walk=0,6)
+The tool does the rest, but it is good to know what the 3rd and 4th value do so scroll down to the bottom of this text for their explanation
+
+
+Parent keys:
+I created parent keys that add keys that can take their parent's values, they will appropriately change any value as needed.
+These are the base minimum to get all the keys needed for a complete working sequence
+The parent keys are:
+
+Walk
+FireUp
+Die1
+Idle1
+
+Make sure to enter at least these keys!
+
+Other parent keys are:
+Fly
+Swim
+Deploy
+
+There are other mechanics to optimize the sequence too: like Guard and Ready will take each other's values if the one is missing; Prone will take Crawl's values and changes framecount to 1, etc.
+
+
+* Underlined keys mean:
+Its automatically added, and uses the best values of a related key assuming its frames are missing, until defined by the user.
+
+* The TS checkbox:
+Simply removes the keys that are used by RA2/YR only
+
+
+
+
+
+
+
+
+Other tutorials:
+
+
+
+
+
+by BobingAbout (http://www.yrargentina.com/old/index.php?page=tutorials/infseq2):
+Here is a complete list of the different tags and what they are used for
+
+Ready= for standing still
+Guard= standing still when in guard mode
+Prone= not moving in the crawl position
+Walk= walking
+FireUp= firing while standing
+Down= moving from standing to crawl position
+Crawl= crawling
+Up= moving from crawl to standing position
+FireProne= firing while in the crawl position
+Idle1= anim to play while doing nothing
+Idle2= second anim to play while doing nothing
+Die1= first die sequence
+Die2= second die sequence
+Die3= seemingly unused die sequences
+Die4= seemingly unused die sequences
+Die5= seemingly unused die sequences
+Cheer= cheering when winning
+Panic= running around silly when afraid
+SecondaryFire= special anim to play for second weapon while standing
+SecondaryProne= special anim to play for second weapon while in the crawl position
+
+Special for jumpjet infantry
+
+Fly= moving while in the air
+Hover= not moving while in the air
+FireFly= firing while in the air
+Tumble=
+AirDeathStart= anim to play when dying while flying
+AirDeathFalling= anim to play while falling out off the air
+AirDeathFinish= death anim to play when hits the ground
+
+Special for deploying or deploy fire infantry
+
+Deploy= anim to play moving to the deploy posision
+Deployed= doing nothing while deployed (this is also for when in deploy fire but isn't ready to undeploy yet)
+DeployedFire= firing while deployed
+DeployedIdle= anim to play while doing nothing while deployed
+Undeploy= anim to play when moving back to standing position
+
+Specials for swimming infantry
+
+Swim= moving while in water (or swimming)
+Tread= not moving while in water (EG bobing up and down)
+WetAttack= firing while in water
+WetIdle1= anim 1 to play while doing nothing in water
+WetIdle2= anim 2 to play while doing nothing in water
+WetDie1= die 1 while in water
+WetDie2= die 2 while in water
+
+Some other YR sequence tags to play sounds while playing the anim
+
+Idle2Sounds= plays a sound during idle anim 2
+Die1Sounds= plays a die sound for die 1(don't really need these unless you want to specify seperate sounds for die1 to die2)
+Die2Sounds= Plays a die sound for die 2
+WalkSounds= sound to play while walking
+CrawlSounds= sound to play while crawling
+
+First number
+First number is called starting frame, this is the first frame of the first facing anim.
+
+Second number
+This is the number of frames that are played in a infinite loop while this function is happening, some things play the loop once and then play a difference sequence, like fire plays once then goes back to standing. some anims only have a single frame, you think it just displays that single frame, when actually its continuasly playing a 1 frame anim which looks like its a single frame.
+
+Third number
+Now, this is the hardest to explain, so the eisiest way is to explain using examples and referencing the 2nd number a lot. The 3rd number is called "frame skip" basicly, lets look at prone and crawl sequencies. most prone sequencies are made by taking the first frame of every crawl facing sequence. what i mean is it plays the crawl sequence for prone, but only the first frame of it, this is how it works. The first frame of the first facing could be 120. each facing has 6 frames. therefore crawl is 120,6,6. it plays all 6 frames in a loop for the duration of the crawl. if it then stops and goes to the prone sequencies, we want it to play the first frame for the same sequence, so the start frame is the same, 120. the second number is 1 as we want it to play only the first frame. and the 3rd number is 6, as thats what the frame skip is, IE, thats how many frames there are before the next facing. if you want to play the second frame its the same except the start number is 1 higher to point the start frame to frame 2. hope thats simple enough for you.
+
+Fourth number/letter
+Some sequences have a letter on the end. being N, NE, E, SE, S, SW, W, or NW This is for such things as IDLE anims where the frame skip is set to 0 so it always plays the same anim no matter which way its facing. so, for example, at the end its facing north, so we want it to face north after playing the anim, we simply add a N as a 4th number to do that. Don't forget, there is a 45 degree rotation so N doesn't face up, i can't remember which way its rotated, but i think its clockwise, so N actually faces what we'd consider to be NE. so be carefull. Also, the first facing direction is up, and it rotates in an anti clockwise direction, so next is up and left, then left, etc, thats it
+
+
+
+Here is my own explanation of the 3rd number if you still don't get it:
+
+the 3rd number is the amount of frames it skips to get to the next direction
+so naturally, its the same amount as the second number
+
+Here is an example:
+Crawl=86,6,6
+Prone=86,1,6
+Prone uses the 3rd number very cleverly
+Prone is the animation that only uses 1 frame (it lays flat on the ground)
+so its using the first frame of the crawl animation
+you can see they both use the same start frame (86)
+Crawl uses all 6 frames,
+Prone uses only 1 frame, but it still needs to skip 6 frames to get to the next direction, hence 86,1,6
+(There are 8 directions for infantry, but the 2nd number should only have the frame amount for 1 direction, the game knows this that's why you dont have to worry about all 8 directions, it just multiplies the frames by 8 assuming all directions of the anim are present)
+But for special animations, like Die1, and Idle1/2,  you have 0 as third number, implying there is only 1 single facing for that anim available
+
