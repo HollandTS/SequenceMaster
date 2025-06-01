@@ -1,5 +1,5 @@
 # SequenceMaster
-A tool to load shp unit frames with its sequence ini, and see the frames with animations.
+A tool for C&C RA2/TS to load shp unit frames with its sequence ini, and see the frames with animations.
 
 ## Usage:
 Load your frames, (select transparency color if desired). Select Infantry or Vehicl, and paste the sequence,  
