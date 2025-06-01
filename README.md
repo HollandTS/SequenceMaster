@@ -1,6 +1,20 @@
-# inf_sequence_completer
+# SequenceMaster
+A tool to load shp unit frames with its sequence ini, and see the frames with animations.
+
+## Usage:
+Load your frames, (select transparency color if desired). Select Infantry or Vehicl, and paste the sequence,  
+rightclick on frames for copy/pasting and swapping if needed
+Press Convert to Vehicle/Infantry to convert.
+Save frames
+
+![sequencemaster_convert](https://github.com/user-attachments/assets/6f81b86d-c3a2-4d03-83bd-c50bd14b7e19)
+
+
+
+
+
+# inf_sequence_completer (the button topleft)
 A Infantry Sequence helper tool for RA2/TS to help generate the right ini entries for infantry sequence in the art.ini
-![infseqhlpgif](https://github.com/user-attachments/assets/c8d64bc5-0869-4416-9a31-1f18f678af35)
 
 I made this to simplify writing the Infantry Sequence. All you have to know now is the first and second value, which are:
 Starting Frame and Animation frame count (e.g.: Walk=0,6)
