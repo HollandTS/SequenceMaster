@@ -251,97 +251,35 @@ def create_ui():
         for anim, directions_dict in frames_grid.items():
             tk.Label(frames_inner, text=f"{anim}:", font=("Arial", 11, "bold"), anchor="w").pack(anchor="w", pady=(4,1))
             is_special = anim in SPECIAL_KEYS or anim in VEHICLE_DEATH_IDLE
-            all_dirs_short = all(len(frames) <= 4 for frames in directions_dict.values())
-            if is_special:
+            # Calculate per-direction frame counts
+            dir_frame_counts = [len(frames) for frames in directions_dict.values() if len(frames) > 0]
+            all_dirs_same = len(dir_frame_counts) > 0 and all(n == dir_frame_counts[0] for n in dir_frame_counts)
+            frame_count = dir_frame_counts[0] if all_dirs_same else 0
+            # Calculate total unique frames for this animation
+            all_frame_indices = []
+            for frame_indices in directions_dict.values():
+                all_frame_indices.extend(frame_indices)
+            unique_frame_indices = list(dict.fromkeys(all_frame_indices))  # preserve order, remove duplicates
+
+            if is_special or (all_dirs_same and 1 <= frame_count <= 4):
+                # Show all directions and their frames in a single row, with direction labels inline
                 row_frame = tk.Frame(frames_inner)
                 row_frame.pack(anchor="w", pady=0)
-                seen = set()
-                unique_indices = []
-                if mode == 'Vehicle' and anim in VEHICLE_DEATH_IDLE:
-                    dir_names = list(directions_dict.keys())
-                    if dir_names:
-                        frame_indices = directions_dict[dir_names[0]]
-                        for frame_idx in frame_indices:
-                            if frame_idx not in seen:
-                                seen.add(frame_idx)
-                                unique_indices.append(frame_idx)
-                        # Cap to correct count from INI
-                        seq = input_text_box.get('1.0', 'end').strip()
-                        ini_data = parse_ini_data(seq)
-                        count_key = 'IdleFrames' if anim == 'IdleFrames' else 'DeathFrames'
-                        count = 0
-                        if count_key in ini_data:
-                            parts = [p.strip() for p in ini_data[count_key].split(',') if p.strip()]
-                            if len(parts) >= 2:
-                                try:
-                                    count = int(parts[1])
-                                except Exception:
-                                    count = 0
-                        if count > 0:
-                            unique_indices = unique_indices[:count]
-                else:
-                    for frame_indices in directions_dict.values():
-                        for frame_idx in frame_indices:
-                            if frame_idx not in seen:
-                                seen.add(frame_idx)
-                                unique_indices.append(frame_idx)
-                    # Cap for Infantry Die1 and Idle1
-                    if mode == 'Infantry' and anim in ('Die1', 'Idle1'):
-                        seq = input_text_box.get('1.0', 'end').strip()
-                        ini_data = parse_ini_data(seq)
-                        count_key = anim
-                        count = 0
-                        if count_key in ini_data:
-                            parts = [p.strip() for p in ini_data[count_key].split(',') if p.strip()]
-                            if len(parts) >= 2:
-                                try:
-                                    count = int(parts[1])
-                                except Exception:
-                                    count = 0
-                        if count > 0:
-                            unique_indices = unique_indices[:count]
-                for i, frame_idx in enumerate(unique_indices):
-                    frame = frame_loader.get_frame(frame_idx)
-                    if frame:
-                        fname, img = frame
-                        thumb_refs.append(img)
-                        lbl = tk.Label(row_frame, image=img, borderwidth=0, width=img.width(), height=img.height(), padx=0, pady=0)
-                        lbl.pack(side="left", padx=0, pady=0)
-                        # Track original name for tooltip
-                        if frame_idx not in frame_original_names:
-                            frame_original_names[frame_idx] = fname
-                        def make_tooltip(idx=frame_idx, name=fname):
-                            def on_enter(event):
-                                prev = frame_original_names.get(idx, name)
-                                text = f"{name}"
-                                if prev != name:
-                                    text += f"\nwas {prev}"
-                                show_tooltip(event, text)
-                            return on_enter
-                        lbl.bind("<Enter>", make_tooltip())
-                        lbl.bind("<Leave>", hide_tooltip)
-                        lbl.bind("<Button-1>", lambda e, idx=frame_idx: selector.on_left_click(idx))
-                        lbl.bind("<Button-3>", lambda e, idx=frame_idx: selector.on_right_click(e, idx))
-                        frame_labels.append((lbl, frame_idx))
-                    else:
-                        tk.Label(row_frame, text="", width=4, height=2, borderwidth=0, padx=0, pady=0).pack(side="left", padx=0, pady=0)
-            elif all_dirs_short:
-                grid_frame = tk.Frame(frames_inner)
-                grid_frame.pack(anchor="w", pady=0)
-                for col, dir_name in enumerate(DIRS):
-                    tk.Label(grid_frame, text=dir_name, width=4, anchor="center", borderwidth=0, padx=0, pady=0).grid(row=0, column=col+1, padx=0, pady=0)
-                for col, dir_name in enumerate(DIRS):
+                for dir_name in DIRS:
                     frame_indices = directions_dict.get(dir_name, [])
-                    if frame_indices:
-                        frame = frame_loader.get_frame(frame_indices[0])
+                    if not frame_indices:
+                        continue
+                    tk.Label(row_frame, text=f"{dir_name}", padx=2).pack(side="left")
+                    for frame_idx in frame_indices:
+                        frame = frame_loader.get_frame(frame_idx)
                         if frame:
                             fname, img = frame
                             thumb_refs.append(img)
-                            lbl = tk.Label(grid_frame, image=img, borderwidth=0, width=img.width(), height=img.height(), padx=0, pady=0)
-                            lbl.grid(row=1, column=col+1, padx=0, pady=0)
-                            if frame_indices[0] not in frame_original_names:
-                                frame_original_names[frame_indices[0]] = fname
-                            def make_tooltip(idx=frame_indices[0], name=fname):
+                            lbl = tk.Label(row_frame, image=img, borderwidth=0, width=img.width(), height=img.height(), padx=0, pady=0)
+                            lbl.pack(side="left", padx=0, pady=0)
+                            if frame_idx not in frame_original_names:
+                                frame_original_names[frame_idx] = fname
+                            def make_tooltip(idx=frame_idx, name=fname):
                                 def on_enter(event):
                                     prev = frame_original_names.get(idx, name)
                                     text = f"{name}"
@@ -351,18 +289,18 @@ def create_ui():
                                 return on_enter
                             lbl.bind("<Enter>", make_tooltip())
                             lbl.bind("<Leave>", hide_tooltip)
-                            lbl.bind("<Button-1>", lambda e, idx=frame_indices[0]: selector.on_left_click(idx))
-                            lbl.bind("<Button-3>", lambda e, idx=frame_indices[0]: selector.on_right_click(e, idx))
-                            frame_labels.append((lbl, frame_indices[0]))
+                            lbl.bind("<Button-1>", lambda e, idx=frame_idx: selector.on_left_click(idx))
+                            lbl.bind("<Button-3>", lambda e, idx=frame_idx: selector.on_right_click(e, idx))
+                            frame_labels.append((lbl, frame_idx))
                         else:
-                            tk.Label(grid_frame, text="", width=4, height=2, borderwidth=0, padx=0, pady=0).grid(row=1, column=col+1, padx=0, pady=0)
-                    else:
-                        tk.Label(grid_frame, text="", width=4, height=2, borderwidth=0, padx=0, pady=0).grid(row=1, column=col+1, padx=0, pady=0)
+                            tk.Label(row_frame, text="", width=4, height=2, borderwidth=0, padx=0, pady=0).pack(side="left", padx=0, pady=0)
+                # Add a little space at the end
+                tk.Label(row_frame, text="").pack(side="left", padx=4)
             else:
+                # Always use per-direction grid for other cases
                 grid_frame = tk.Frame(frames_inner)
                 grid_frame.pack(anchor="w", pady=0)
-                row = 0
-                for dir_name in DIRS:
+                for row, dir_name in enumerate(DIRS):
                     frame_indices = directions_dict.get(dir_name, [])
                     if not frame_indices:
                         continue
@@ -391,7 +329,6 @@ def create_ui():
                             frame_labels.append((lbl, frame_idx))
                         else:
                             tk.Label(grid_frame, text="", width=4, height=2, borderwidth=0, padx=0, pady=0).grid(row=row, column=col+1, padx=0, pady=0)
-                    row += 1
         frames_inner._thumb_refs = thumb_refs  # Prevent garbage collection
         # Set up FrameSelector for editing
         global selector
